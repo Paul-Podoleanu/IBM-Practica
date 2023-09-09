@@ -1,0 +1,45 @@
+---
+
+- name: Homework_1_Playbook
+  hosts: ubuntu
+  become: True
+  tasks:
+    - name: Ping
+      ansible.builtin.ping:
+      register: ping_output
+
+    - name: Show ping output
+      ansible.builtin.debug:
+        var: ping_output
+    
+    - name: Install mc package
+      ansible.builtin.apt:
+        name: mc
+        state: present
+
+    - name: Create group
+      ansible.builtin.group:
+        name: lidec_ssh
+        state: present
+
+    - name: Create file
+      ansible.builtin.copy:
+        path: /home/ansible/homework_1.txt
+        content: |
+          I can rund Ansible commands
+        mode: 0642
+        group: lidec_ssh
+
+      - name: New User
+        ansible.builtin.user:
+          name: lisa
+          home: /usr/local/home/lisa
+
+
+      - name: Copy 
+        ansible.builtin.copy:
+          src: /etc/resolv.coef
+          dest: /home/ansible/resolv.coef
+
+
+...

@@ -1,0 +1,58 @@
+---
+
+- name: Homework_2_Playbook
+  hosts: ubuntu
+  become: True
+  tasks:
+    - name: Change time zone to America/Chicago
+      community.general.timezone:
+        name: Asia/Tokyo
+      notify: Restart cron
+
+    - name: Create zip archive of /etc/xdg without /etc/xdg/autostart
+      community.general.archive:
+        path: /etc/xdg/*
+        dest: /home/ansible/xdg.zip
+        exclude_path: /etc/xdg/autostart
+
+    - name: Copy the archive to control node
+      ansible.builtin.fetch:
+        src: /home/ansible/xdg.zip
+        dest: /tmp/archive_xdg.zip
+        flat: yes
+
+    - name: Create script
+      blockinfile:
+        create: True
+        dest: /tmp/cron_date.sh
+        mode: 0755
+        owner: ansible
+        block: |
+          #!/bin/bash
+          date >> /tmp/cron_date
+
+    - name: Create user john
+      ansible.builtin.user:
+        name: john
+
+    - name: Create cronjob with john as owner
+      ansible.builtin.cron:
+        name: cron_script
+        user: john
+        job: /tmp/cron_date.sh
+        minute: '*/5'
+      register: cron_output
+
+    - name: Debug the cron output
+      ansible.builtin.debug:
+        msg: "cronjobtask: {{ cron_output['changed'] }}"
+    
+
+  handlers: 
+
+    - name: Restart cron 
+      ansible.builtin.service:
+        name: cron
+        state: restarted
+
+...
