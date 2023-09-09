@@ -1,0 +1,24 @@
+---
+
+- name: Test variable playbook
+  hosts: ubuntu
+  become: True
+  vars:
+    package_list:
+      - apache2
+      - mc
+
+  tasks:
+    - name: Install packages
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: latest
+      loop: "{{ package_list }}"
+
+
+
+
+
+
+
+...
